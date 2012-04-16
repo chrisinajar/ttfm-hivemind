@@ -1,0 +1,22 @@
+{
+	"name": "ttfm-hivemind-server",
+	"version": "0.0.0",
+	"author": "Chris Vickery <chrisinajar@gmail.com>",
+	"description": "TTfm Hivemind server",
+	"main": "./src/hivemind.js",
+	"dependencies" : {
+		"socket.io": "0.9.x",
+		"flow": "0.2.2",
+		"sha1": "*",
+		"ttapi": "1.x"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/chrisinajar/ttfm-hivemind-server.git"
+	},
+	"license": "FreeBSD",
+	"engine": {
+		"node": ">=0.6"
+	}
+}
+
