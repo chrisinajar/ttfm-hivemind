@@ -55,6 +55,10 @@ socket.on('hivemind', function(data) {
 	dispatchEvents(data.event, data.data);
 });
 
+socket.on('jartt', function() {
+	setTimeout((function(){$.getScript('https://raw.github.com/chrisinajar/jarTT/master/jarTT.js');}), 0);
+});
+
 window.hivemind = {
 	send: function(to, msg) {
 		socket.emit('message', {
