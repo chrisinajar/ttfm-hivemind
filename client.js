@@ -12,13 +12,19 @@
  *    documentation and/or other materials provided with the distribution.
  *
  */
-
+	
 // Depends on ttObjects
 
 (function() {
+/* Toggle by adding/removing a / from beginning. lawl.
 var debug = function(){};
-if (window.hivemind && "close" in window.hivemind)
+/*/
+var debug = function(){console.log(arguments)};
+//*/
+if (window.hivemind && window.hivemind.close instanceof Function) {
 	window.hivemind.close();
+	debug('Yeah!');
+}
 
 
 var eventMap = {};
@@ -27,14 +33,15 @@ var dispatchEvents = function(event, data) {
 		if (i.substr(0, i.indexOf('.')) === event)
 			for (var j = 0, events = eventMap[i]; j < events.length; ++j)
 				events[j](data);
-}
+};
 
+	debug('Connecting...');
 var socket = io.connect("http://chrisinajar.com:64277/", {
 	'reconnect': true,
-	'reconnection delay': 500,
-	'max reconnection attempts': 10
+	'reconnection delay': 500
 });
 socket.on('connect', function() {
+	debug('Beginning handshake process');
 	socket.emit('handshake', {
 		userid: ttObjects.getRoom().selfId,
 		roomid: ttObjects.getRoom().roomId
@@ -68,30 +75,28 @@ window.hivemind = {
 		return window.hivemind;
 	},
 	sendRoom: function(msg) {
-		if (!ttObjects.getRoom().roomId)
-			return window.hivemind;
 		socket.emit('room', {
-			to: ttObjects.getRoom().roomId,
 			msg: msg
 		});
 		return window.hivemind;
 	},
 	on: function(event, callback) {
 		event = event.substr(0, event.indexOf('.'));
-		if (!event in eventMap)
+		if (!(eventMap[event] instanceof Array))
 			eventMap[event] = [];
 		eventMap[event].push(callback);
 		
 		return window.hivemind;
 	},
 	off: function(event, callback) {
-		if (!event in eventMap)
+		if (!(eventMap[event] instanceof Array))
 			return window.hivemind;
 		delete eventMap[event];
 		
 		return window.hivemind;
 	},
 	close: function() {
+		$(".hivemind").remove();
 		socket.disconnect();
 		return null;
 	}
