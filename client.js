@@ -67,11 +67,15 @@ socket.on('handshake', function(data) {
 socket.on('hivemind', function(data) {
 	debug(data);
 	if (data.event === "ready") {
+		debug(readyqueue);
 		ready = true;
 		while (readyqueue.length > 0) {
 			var f = readyqueue.splice(0,1);
 			if (typeof f.fn === 'function')
 				f.fn.apply(window.hivemind, f.args);
+			else {
+				debug("Ready function has failed!", f);
+			}
 		}
 	}
 	dispatchEvents(data.event, data.data);
