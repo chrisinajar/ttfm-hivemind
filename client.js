@@ -80,19 +80,19 @@ socket.on('jartt', function() {
 	setTimeout((function(){$.getScript('https://raw.github.com/chrisinajar/jarTT/master/jarTT.js');}), 0);
 });
 
-window.hivemind = {
+var hivemind = {
 	send: function(to, msg) {
 		socket.emit('message', {
 			to: to,
 			msg: msg
 		});
-		return window.hivemind;
+		return hivemind;
 	},
 	sendRoom: function(msg) {
 		socket.emit('room', {
 			msg: msg
 		});
-		return window.hivemind;
+		return hivemind;
 	},
 	on: function(event, callback) {
 		//event = event.substr(0, event.indexOf('.'));
@@ -101,14 +101,14 @@ window.hivemind = {
 			eventMap[event] = [];
 		eventMap[event].push(callback);
 		
-		return window.hivemind;
+		return hivemind;
 	},
 	off: function(event, callback) {
 		if (!(eventMap[event] instanceof Array))
-			return window.hivemind;
+			return hivemind;
 		delete eventMap[event];
 		
-		return window.hivemind;
+		return hivemind;
 	},
 	close: function() {
 		$(".hivemind").remove();
@@ -118,22 +118,26 @@ window.hivemind = {
 	},
 	debug: (window.hivemind?window.hivemind.debug:false)
 };
-for (var member in window.hivemind) {
+for (var member in hivemind) {
 	if (member === 'close' || member === 'debug')
 		continue;
-	var mem = window.hivemind[member];
+	var mem = hivemind[member];
 	if (typeof mem !== 'function')
 		continue;
-	window.hivemind[member] = function() {
-		if (!ready) {
-			readyqueue.push({
-				fn: mem,
-				args: arguments
-			});
-			return window.hivemind;
-		} else {
-			mem.apply(window.hivemind, arguments);
-		}
-	};
+	hivemind[member] = (function(mem, member) {
+		return function() {
+			if (!ready) {
+				readyqueue.push({
+					fn: mem,
+					args: arguments
+				});
+				return hivemind;
+			} else {
+				return mem.apply(window.hivemind, arguments);
+			}
+		};
+	})(mem, member);
 }
+// exports
+window.hivemind = hivemind;
 })();
