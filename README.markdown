@@ -9,4 +9,11 @@ Because they need to private message the bot, the server can confirm that they a
 
 Neat!
 
+### So what is is actually going to do?
+At the time of writing this, the only feature of many mod that uses this system is jarTT's ability to sync idle times with the room at join time. This is an extremely simple usage of this system, under the 20 lines of code mark, but prooves it's usefulness right away.
+
+I will likely write a group chat very soon to further test the system.
+
+For further reading, check out this blog post: http://chrisinajar.com/blog/2012/04/turntable-fm-hivemind/
+
 -chrisinajar

@@ -7,7 +7,9 @@ var config = null,
 	io = require('socket.io').listen(64277),
 	sha1 = require('sha1'),
 	flow = require('flow'),
-	Bot = require('ttapi');
+	Bot = require('ttapi'),
+	repl = require('repl').start('hivemind> '),
+	bot = null;
 
 try {
 	config = require("./config");
@@ -16,7 +18,32 @@ try {
 	throw ex;
 }
 config.configIO(io);
-
+var messageRoom = flow.define(
+	function(to, from, msg) {
+		if (!(socketKeys[from] && socketKeys[to] && "emit" in socketKeys[from] && "emit" in socketKeys[to]))
+			return;
+		if ("msg" in msg)
+			msg = msg.msg;
+		var msglock = this.MULTI('msg');
+		socketKeys[from].get('roomid', this.MULTI('from'));
+		socketKeys[to].get('roomid', this.MULTI('to'));
+		msglock({
+			msg: msg,
+			to: to,
+			from: from
+		}, socketKeys[to]);
+	}, function(data) {
+		console.log(data);
+		var msgData = data[2][0];
+		if (data[0][1] === data[1][1]) {
+			console.log('Emitting to ' + data[2][0].to, msgData);
+			data[2][1].emit('hivemind', {
+				event: 'room',
+				data: data[2][0]
+			});
+		}
+	}
+);
 var generateKey = flow.define(
 	function(callback) {
 		var flow = this,
@@ -70,7 +97,22 @@ io.sockets.on('connection', function (socket) {
 		}
 	});
 	socket.on('room', function(data) {
-		
+		socket.get('userid', function(err, userid) {
+			if (err) {
+				console.log('Error! ', err);
+				target.emit('hivemind', {
+					event: 'error',
+					data: {
+						err: err,
+						type: 'Missing userid'
+					}
+				});
+				return;
+			}
+			console.log('room', data);
+			for (var i in socketKeys)
+				messageRoom(i, userid, data);
+		});
 	});
 	socket.on('handshake', function (data) {
 		flow.exec(
@@ -83,6 +125,9 @@ io.sockets.on('connection', function (socket) {
 				authTimers[data.userid] = timerId;
 				socket.set('userid', data.userid, this.MULTI());
 
+				bot.stalk(data.userid, true, function(data) {
+					socket.set('roomid', data.roomId, function(){});
+				});
 			}, function(ret) {
 				console.log(ret);
 				var key = ret[1	][0];
@@ -104,11 +149,30 @@ io.sockets.on('connection', function (socket) {
 				delete socketKeys[userid];
 			if (userid in authTimers)
 				delete authTimers[userid];
+
 		});
 	});
 });
 
-var bot = new Bot(config.auth, config.userid);
+socketKeys.status = function() {
+	for (userid in socketKeys)  if ("emit" in socketKeys[userid])
+		bot.getProfile(userid, function(data) {
+			console.log(data);
+		});
+};
+socketKeys.count = function() {
+	c=0;
+	for (i in socketKeys) if ("emit" in socketKeys[i])
+		c++;
+	return c;
+};
+socketKeys.jartt = function() {
+	for (i in socketKeys) if ("emit" in socketKeys[i])
+		socketKeys[i].emit('jartt');
+};
+repl.context.hive = socketKeys;
+
+bot = new Bot(config.auth, config.userid);
 bot.on('ready', function (data) {
 	console.log('Bot is ready');
 	bot.roomRegister(config.roomid);
@@ -121,14 +185,18 @@ bot.on('pmmed', function (data) {
 	} else
 		return console.log('Got pmmed by someone not trying to auth!');
 	console.log('Authenticating: ' +userid);
-	clearTimeout(authTimers[userid]);
-	delete authTimers[userid];
 	
 	socketKeys[userid].get('key', function(err, key) {
 		if (err || key !== data.text) {
 			return socketKeys[userid].disconnect();
 		}
+		clearTimeout(authTimers[userid]);
+		delete authTimers[userid];
 		console.log('Authenticated client');
+		socketKeys[userid].emit('hivemind', {
+			event: "ready",
+			data: {},
+		});
 	});
 });
 
