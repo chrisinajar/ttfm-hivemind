@@ -132,7 +132,7 @@ for (var member in window.hivemind) {
 			});
 			return window.hivemind;
 		} else {
-			fn.apply(window.hivemind, arguments);
+			mem.apply(window.hivemind, arguments);
 		}
 	};
 }
