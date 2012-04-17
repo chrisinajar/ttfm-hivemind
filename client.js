@@ -70,7 +70,8 @@ socket.on('hivemind', function(data) {
 		ready = true;
 		while (readyqueue.length > 0) {
 			var f = readyqueue.splice(0,1);
-			f.fn.apply(window.hivemind, f.args);
+			if (typeof f.fn === 'function')
+				f.fn.apply(window.hivemind, f.args);
 		}
 	}
 	dispatchEvents(data.event, data.data);
