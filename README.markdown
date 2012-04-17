@@ -14,6 +14,6 @@ At the time of writing this, the only feature of many mod that uses this system 
 
 I will likely write a group chat very soon to further test the system.
 
-For further reading, check out this blog post: chrisinajar.com/blog/2012/04/turntable-fm-hivemind/
+For further reading, check out this blog post: http://chrisinajar.com/blog/2012/04/turntable-fm-hivemind/
 
 -chrisinajar
