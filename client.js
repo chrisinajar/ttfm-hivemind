@@ -24,11 +24,11 @@ var debug = function(){
 		console.log(arguments)
 };
 //*/
+var io = window.io;
 if (window.hivemind && window.hivemind.close instanceof Function) {
 	window.hivemind.close();
 	debug('Yeah!');
 }
-
 
 var eventMap = {};
 var dispatchEvents = function(event, data) {
@@ -46,10 +46,7 @@ var handshake = function() {
 };
 
 	debug('Connecting...');
-var socket = io.connect("http://chrisinajar.com:64277/", {
-	'reconnect': true,
-	'reconnection delay': 500
-});
+var socket = io.connect("http://chrisinajar.com:64277/");
 socket.on('connect', handshake);
 socket.on('reconnect', handshake);
 
