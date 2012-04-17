@@ -33,9 +33,12 @@ if (window.hivemind && window.hivemind.close instanceof Function) {
 var eventMap = {};
 var dispatchEvents = function(event, data) {
 	for (var i in eventMap)
-		if (i.substr(0, i.indexOf('.')) === event)
+		if (i.substr(0, i.indexOf('.')) === event) {
 			for (var j = 0, events = eventMap[i]; j < events.length; ++j)
 				events[j](data);
+		} else {
+			debug('nope.avi', i.substr(0, i.indexOf('.')), event);
+		}
 };
 var handshake = function() {
 	debug('Beginning handshake process');
