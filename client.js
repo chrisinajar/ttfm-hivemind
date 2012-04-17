@@ -19,7 +19,10 @@
 /* Toggle by adding/removing a / from beginning. lawl.
 var debug = function(){};
 /*/
-var debug = function(){console.log(arguments)};
+var debug = function(){
+	if (window.hivemind && window.hivemind.debug)
+		console.log(arguments)
+};
 //*/
 if (window.hivemind && window.hivemind.close instanceof Function) {
 	window.hivemind.close();
@@ -34,19 +37,21 @@ var dispatchEvents = function(event, data) {
 			for (var j = 0, events = eventMap[i]; j < events.length; ++j)
 				events[j](data);
 };
+var handshake = function() {
+	debug('Beginning handshake process');
+	socket.emit('handshake', {
+		userid: ttObjects.getRoom().selfId,
+		roomid: ttObjects.getRoom().roomId
+	} );
+};
 
 	debug('Connecting...');
 var socket = io.connect("http://chrisinajar.com:64277/", {
 	'reconnect': true,
 	'reconnection delay': 500
 });
-socket.on('connect', function() {
-	debug('Beginning handshake process');
-	socket.emit('handshake', {
-		userid: ttObjects.getRoom().selfId,
-		roomid: ttObjects.getRoom().roomId
-	} );
-});
+socket.on('connect', handshake);
+socket.on('reconnect', handshake);
 
 socket.on('handshake', function(data) {
 	debug('Sending a pm to ' + data.userid);
@@ -99,6 +104,7 @@ window.hivemind = {
 		$(".hivemind").remove();
 		socket.disconnect();
 		return null;
-	}
+	},
+	debug: (window.hivemind?window.hivemind.debug:false)
 };
 })();
