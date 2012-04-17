@@ -25,6 +25,8 @@ var debug = function(){
 };
 //*/
 var io = window.io;
+var ready = false,
+	readyqueue = [];
 if (window.hivemind && window.hivemind.close instanceof Function) {
 	window.hivemind.close();
 	debug('Yeah!');
@@ -64,6 +66,13 @@ socket.on('handshake', function(data) {
 
 socket.on('hivemind', function(data) {
 	debug(data);
+	if (data.event === "ready") {
+		ready = true;
+		while (readyqueue.length > 0) {
+			var f = readyqueue.splice(0,1);
+			f.fn.apply(window.hivemind, f.args);
+		}
+	}
 	dispatchEvents(data.event, data.data);
 });
 
@@ -104,8 +113,27 @@ window.hivemind = {
 	close: function() {
 		$(".hivemind").remove();
 		socket.disconnect();
+		delete window.hivemind;
 		return null;
 	},
 	debug: (window.hivemind?window.hivemind.debug:false)
 };
+for (var member in window.hivemind) {
+	if (member === 'close' || member === 'debug')
+		continue;
+	var mem = window.hivemind[member];
+	if (typeof mem !== 'function')
+		continue;
+	window.hivemind[member] = function() {
+		if (!ready) {
+			readyqueue.push({
+				fn: mem,
+				args: arguments
+			});
+			return window.hivemind;
+		} else {
+			fn.apply(window.hivemind, arguments);
+		}
+	};
+}
 })();
