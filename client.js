@@ -86,7 +86,7 @@ window.hivemind = {
 		return window.hivemind;
 	},
 	on: function(event, callback) {
-		event = event.substr(0, event.indexOf('.'));
+		//event = event.substr(0, event.indexOf('.'));
 		debug('Registering for event:', event);
 		if (!(eventMap[event] instanceof Array))
 			eventMap[event] = [];
