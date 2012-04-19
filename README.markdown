@@ -20,7 +20,9 @@ Awesome! Run this to load hivemind:
 $.getScript('https://raw.github.com/chrisinajar/ttfm-hivemind/master/client.js');
 ```
 
+
 Sending a message:
+
 ```javascript
 // send a message!
 hivemind.send(userid, 'Hey');
@@ -31,7 +33,9 @@ hivemind.send(userid, {key: 'value'});
 hivemind.sendRoom({key: 'value'});
 ```
 
+
 Listening for a message:
+
 ```javascript
 // listen for a message
 hivemind.on('message', function(data) {
@@ -44,13 +48,14 @@ hivemind.on('room', function(data) {
 });
 ```
 
+
 Errors:
+
 ```javascript
 // errors be here
 hivemind.on('error', function(err) {
   console.log('Oh nooooooo!', err);
 });
-
 ```
 
 For further reading, check out this blog post: http://chrisinajar.com/blog/2012/04/turntable-fm-hivemind/
