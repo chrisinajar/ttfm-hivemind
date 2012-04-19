@@ -14,6 +14,45 @@ At the time of writing this, the only feature of many mod that uses this system 
 
 I will likely write a group chat very soon to further test the system.
 
+### I'm a developer and want to use hivemind
+Awesome! Run this to load hivemind:
+```javascript
+$.getScript('https://raw.github.com/chrisinajar/ttfm-hivemind/master/client.js');
+```
+
+Sending a message:
+```javascript
+// send a message!
+hivemind.send(userid, 'Hey');
+// send some json!
+hivemind.send(userid, {key: 'value'});
+
+// You can also send stuff to the whole room as a broadcast
+hivemind.sendRoom({key: 'value'});
+```
+
+Listening for a message:
+```javascript
+// listen for a message
+hivemind.on('message', function(data) {
+  console.log('Got a message from ' + data.from + ' that says: ', data.msg);
+});
+
+// listen for a message that was broadcasted
+hivemind.on('room', function(data) {
+  hivemind.send(data.from, 'Stop it.'); // Don't do this!
+});
+```
+
+Errors:
+```javascript
+// errors be here
+hivemind.on('error', function(err) {
+  console.log('Oh nooooooo!', err);
+});
+
+```
+
 For further reading, check out this blog post: http://chrisinajar.com/blog/2012/04/turntable-fm-hivemind/
 
 -chrisinajar
