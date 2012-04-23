@@ -33,10 +33,10 @@ var messageRoom = flow.define(
 			from: from
 		}, socketKeys[to]);
 	}, function(data) {
-		console.log(data);
+		//console.log(data);
 		var msgData = data[2][0];
 		if (data[0][1] === data[1][1]) {
-			console.log('Emitting to ' + data[2][0].to, msgData);
+			console.log('Emitting data from ' + data[2][0].from + ' to ' + data[2][0].to, msgData);
 			data[2][1].emit('hivemind', {
 				event: 'room',
 				data: data[2][0]
@@ -125,12 +125,13 @@ io.sockets.on('connection', function (socket) {
 				authTimers[data.userid] = timerId;
 				socket.set('userid', data.userid, this.MULTI());
 
+				var ridcb = this.MULTI();
 				bot.stalk(data.userid, true, function(data) {
-					socket.set('roomid', data.roomId, function(){});
+					socket.set('roomid', data.roomId, ridcb);
 				});
 			}, function(ret) {
 				console.log(ret);
-				var key = ret[1	][0];
+				var key = ret[1][0];
 				
 				socket.set('key', key, function(d) {
 					console.log(d);
@@ -157,6 +158,12 @@ io.sockets.on('connection', function (socket) {
 socketKeys.status = function() {
 	for (userid in socketKeys)  if ("emit" in socketKeys[userid])
 		bot.getProfile(userid, function(data) {
+			console.log(data);
+		});
+};
+socketKeys.stalk = function() {
+	for (userid in socketKeys)  if ("emit" in socketKeys[userid])
+		bot.stalk(userid, function(data) {
 			console.log(data);
 		});
 };
@@ -188,6 +195,7 @@ bot.on('pmmed', function (data) {
 	
 	socketKeys[userid].get('key', function(err, key) {
 		if (err || key !== data.text) {
+			console.log('Key is wrong!', err, key, data.text);
 			return socketKeys[userid].disconnect();
 		}
 		clearTimeout(authTimers[userid]);
