@@ -42,12 +42,17 @@ var dispatchEvents = function(event, data) {
 			debug('nope.avi', i.substr(0, i.indexOf('.')), event);
 		}
 };
+var shaking = false;
 var handshake = function() {
+	if (shaking)
+		return debug('Not shaking twice at once');
+	else
+		shaking = true;
 	debug('Beginning handshake process');
 	socket.emit('handshake', {
 		userid: ttObjects.getRoom().selfId,
 		roomid: ttObjects.getRoom().roomId
-	} );
+	});
 };
 
 	debug('Connecting...');
@@ -62,6 +67,7 @@ socket.on('handshake', function(data) {
 		receiverid: data.userid,
 		text: data.key
 	});
+	shaking = false;
 });
 
 socket.on('hivemind', function(data) {
