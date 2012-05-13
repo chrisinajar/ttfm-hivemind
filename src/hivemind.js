@@ -4,7 +4,6 @@
  *
  */
 var config = null,
-	io = require('socket.io').listen(64277),
 	sha1 = require('sha1'),
 	flow = require('flow'),
 	Bot = require('ttapi'),
@@ -17,6 +16,9 @@ try {
 	console.log('You need to create a config.js file to run this. Make your own bot.');
 	throw ex;
 }
+
+var io = require('socket.io').listen(config.port);
+
 config.configIO(io);
 var messageRoom = flow.define(
 	function(to, from, msg) {
@@ -179,33 +181,41 @@ socketKeys.jartt = function() {
 };
 repl.context.hive = socketKeys;
 
-bot = new Bot(config.auth, config.userid);
-bot.on('ready', function (data) {
-	console.log('Bot is ready');
-	bot.roomRegister(config.roomid);
-});
+var getBot = function() {
+	bot = new Bot(config.auth, config.userid);
+	bot.on('ready', function (data) {
+		console.log('Bot is ready');
+		bot.roomRegister(config.roomid);
+	});
 
-bot.on('pmmed', function (data) {
-	console.log(data);
-	var userid = data.senderid;
-	if (userid in socketKeys && userid in authTimers && "text" in data && data.text.length > 2) {
-	} else
-		return console.log('Got pmmed by someone not trying to auth!');
-	console.log('Authenticating: ' +userid);
-	
-	socketKeys[userid].get('key', function(err, key) {
-		if (err || key !== data.text) {
-			console.log('Key is wrong!', err, key, data.text);
-			return socketKeys[userid].disconnect();
-		}
-		clearTimeout(authTimers[userid]);
-		delete authTimers[userid];
-		console.log('Authenticated client');
-		socketKeys[userid].emit('hivemind', {
-			event: "ready",
-			data: {},
+	bot.on('pmmed', function (data) {
+		console.log(data);
+		var userid = data.senderid;
+		if (userid in socketKeys && userid in authTimers && "text" in data && data.text.length > 2) {
+		} else
+			return console.log('Got pmmed by someone not trying to auth!');
+		console.log('Authenticating: ' +userid);
+		
+		socketKeys[userid].get('key', function(err, key) {
+			if (err || key !== data.text) {
+				console.log('Key is wrong!', err, key, data.text);
+				return socketKeys[userid].disconnect();
+			}
+			clearTimeout(authTimers[userid]);
+			delete authTimers[userid];
+			console.log('Authenticated client');
+			socketKeys[userid].emit('hivemind', {
+				event: "ready",
+				data: {},
+			});
 		});
 	});
-});
 
+	bot.on('tcpEnd', function() {
+		bot = getBot();
+	});
 
+	return bot;
+};
+
+bot = getBot();
